@@ -61,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('login');
     })->name('dashboard');
 
-    Route::put('/dashboard', [KategoriController::class, 'pilih'])->name('pilih.kategori');
+    Route::put('/dashboard/{id_user}/update', [KategoriController::class, 'pilih'])->name('pilih.kategori');
 
     Route::get('/dashboard/peserta', [PesertaController::class, 'index'])->name('peserta');
     Route::put('/dashboard/peserta/{id_user}/terima', [PesertaController::class, 'terima'])->name('terima_peserta');

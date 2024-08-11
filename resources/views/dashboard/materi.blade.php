@@ -118,7 +118,7 @@
                                         @if (Auth::user()->role === 'admin')
                                             <td class="flex items-center gap-4">
                                                 {{-- Modal Update --}}
-                                                <x-lucide-pencil class="size-5 hover:stroke-yellow-500 cursor-pointer"
+                                                {{-- <x-lucide-pencil class="size-5 hover:stroke-yellow-500 cursor-pointer"
                                                     onclick="document.getElementById('update_materi_{{ $item->id_materi }}').showModal();" />
 
                                                 <dialog id="update_materi_{{ $item->id_materi }}"
@@ -213,6 +213,7 @@
                                                                 </div>
                                                             </form>
 
+                                                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                                                             <script>
                                                                 function showFilePreview(event, id) {
                                                                     const input = event.target;
@@ -253,7 +254,7 @@
                                                                 }
 
                                                                 function handleFileUpload(event, id) {
-                                                                    event.preventDefault();
+                                                                    event.preventDefault(); // Prevent immediate form submission
                                                                     const form = event.target;
                                                                     const formData = new FormData(form);
                                                                     const xhr = new XMLHttpRequest();
@@ -261,33 +262,71 @@
                                                                     const progressPercent = document.getElementById('upload_progress_percent_' + id);
                                                                     const submitButton = document.getElementById('submit_button_' + id);
 
-                                                                    submitButton.disabled = true;
+                                                                    Swal.fire({
+                                                                        title: 'Konfirmasi',
+                                                                        text: 'Apakah Anda yakin ingin menyimpan perubahan ini?',
+                                                                        icon: 'question',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText: 'Ya, simpan!',
+                                                                        cancelButtonText: 'Batal'
+                                                                    }).then((result) => {
+                                                                        if (result.isConfirmed) {
+                                                                            submitButton.disabled = true;
 
-                                                                    xhr.open('POST', form.action, true);
-                                                                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                                                                            xhr.open('POST', form.action, true);
+                                                                            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-                                                                    xhr.upload.addEventListener('progress', function(e) {
-                                                                        if (e.lengthComputable) {
-                                                                            const percentComplete = (e.loaded / e.total) * 100;
-                                                                            progressBar.value = percentComplete;
-                                                                            progressPercent.textContent = Math.round(percentComplete) + '%';
+                                                                            xhr.upload.addEventListener('progress', function(e) {
+                                                                                if (e.lengthComputable) {
+                                                                                    const percentComplete = (e.loaded / e.total) * 100;
+                                                                                    progressBar.value = percentComplete;
+                                                                                    progressPercent.textContent = Math.round(percentComplete) + '%';
+                                                                                }
+                                                                            });
+
+                                                                            xhr.addEventListener('readystatechange', function() {
+                                                                                if (xhr.readyState === 4) {
+                                                                                    submitButton.disabled = false;
+                                                                                    if (xhr.status === 200) {
+                                                                                        Swal.fire({
+                                                                                            title: 'Berhasil!',
+                                                                                            text: 'Materi berhasil diperbarui.',
+                                                                                            icon: 'success',
+                                                                                            timer: 3000, // Close after 3 seconds
+                                                                                            showConfirmButton: false
+                                                                                        }).then(() => {
+                                                                                            document.getElementById('update_materi_' + id).close();
+                                                                                            window.location.reload(); // Refresh after closing the alert
+                                                                                        });
+                                                                                    } else if (xhr.status === 422) {
+                                                                                        const response = JSON.parse(xhr.responseText);
+                                                                                        let errors = '';
+                                                                                        for (const [key, value] of Object.entries(response.errors)) {
+                                                                                            errors += value.join(' ') + '\n';
+                                                                                        }
+                                                                                        Swal.fire({
+                                                                                            title: 'Error Validasi!',
+                                                                                            text: 'Terjadi kesalahan validasi:\n' + errors,
+                                                                                            icon: 'error'
+                                                                                        });
+                                                                                    } else {
+                                                                                        Swal.fire({
+                                                                                            title: 'Error!',
+                                                                                            text: 'Terjadi kesalahan saat memperbarui materi.',
+                                                                                            icon: 'error'
+                                                                                        });
+                                                                                    }
+                                                                                }
+                                                                            });
+
+                                                                            xhr.send(formData);
                                                                         }
                                                                     });
-
-                                                                    xhr.addEventListener('readystatechange', function() {
-                                                                        if (xhr.readyState === 4 && xhr.status === 200) {
-                                                                            document.getElementById('update_materi_' + id).close();
-                                                                            submitButton.disabled = false;
-                                                                        }
-                                                                    });
-
-                                                                    xhr.send(formData);
                                                                 }
                                                             </script>
                                                         </div>
                                                     </div>
-                                                </dialog>
-
+                                                </dialog> --}}
 
                                                 {{-- Hapus --}}
                                                 <x-lucide-trash class="size-5 hover:stroke-red-500 cursor-pointer"
@@ -483,9 +522,22 @@
                     });
 
                     xhr.addEventListener('readystatechange', function() {
-                        if (xhr.readyState === 4 && xhr.status === 200) {
-                            document.getElementById('tambah_materi_modal').close();
+                        if (xhr.readyState === 4) {
                             submitButton.disabled = false;
+                            if (xhr.status === 200) {
+                                const response = JSON.parse(xhr.responseText);
+                                document.getElementById('tambah_materi_modal').close();
+                                alert(response.message);
+                            } else if (xhr.status === 422) {
+                                const response = JSON.parse(xhr.responseText);
+                                let errors = '';
+                                for (const [key, value] of Object.entries(response.errors)) {
+                                    errors += value.join(' ') + '\n';
+                                }
+                                alert('Validation errors occurred:\n' + errors);
+                            } else {
+                                alert('An error occurred while uploading the file.');
+                            }
                         }
                     });
 

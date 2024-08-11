@@ -185,7 +185,9 @@
                                                                 action="{{ route('ubah_kategori', $item->id_kategori) }}"
                                                                 method="POST" class="inline-block">
                                                                 @csrf
-                                                                @method('DELETE')
+                                                                @method('PUT')
+                                                                <input type="hidden" name="kategori"
+                                                                    value="{{ $item->id_kategori }}">
                                                                 <button type="submit"
                                                                     class="btn btn-danger">Tukar</button>
                                                             </form>

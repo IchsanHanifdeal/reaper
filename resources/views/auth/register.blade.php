@@ -36,7 +36,7 @@
             'placeholder' => 'Masukan No Handphone...',
         ],
         'password' => [
-            'type' => 'number',
+            'type' => 'password',
             'label' => 'Password',
             'placeholder' => 'Masukan password...',
         ],
@@ -54,8 +54,10 @@
                     class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white text-center uppercase">
                     Pendaftaran Peserta
                 </h1>
-                <form class="space-y-4 md:space-y-6" action="{{ route('store.peserta') }}" method="POST">
+                <form class="space-y-4 md:space-y-6"
+                    action="{{ route('pilih.kategori', ['id_user' => Auth::user()->id]) }}" method="POST">
                     @csrf
+                    @method('PUT')
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach ($fields as $field => $attributes)
                             <div>
@@ -65,7 +67,7 @@
                                 <input type="{{ $attributes['type'] }}" name="{{ $field }}"
                                     id="{{ $field }}"
                                     class="bg-gray-300 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                                    placeholder="{{ $attributes['placeholder'] }}" required>
+                                    placeholder="{{ $attributes['placeholder'] }}" value="{{ old($field) }}" required>
                                 @error($field)
                                     <span class="validated text-red-500 text-sm">{{ $message }}</span>
                                 @enderror

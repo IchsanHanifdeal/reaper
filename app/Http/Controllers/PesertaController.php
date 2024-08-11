@@ -12,33 +12,73 @@ class PesertaController extends Controller
      */
     public function index()
     {
+        $jumlah_peserta_menunggu_konfirmasi = User::where('validasi', 'menunggu_konfirmasi')
+            ->where('role', '<>', 'admin')
+            ->count();
+
+        $jumlah_peserta_diterima = User::where('validasi', 'diterima')
+            ->where('role', '<>', 'admin')
+            ->count();
+
+        $jumlah_peserta_ditolak = User::where('validasi', 'ditolak')
+            ->where('role', '<>', 'admin')
+            ->count();
+
+        $peserta = User::where('role', 'user')->get();
+
         return view('dashboard.peserta', [
-            'peserta' => User::where('role', 'user')->get(),
+            'jumlah_peserta_menunggu_konfirmasi' => $jumlah_peserta_menunggu_konfirmasi,
+            'jumlah_peserta_diterima' => $jumlah_peserta_diterima,
+            'jumlah_peserta_ditolak' => $jumlah_peserta_ditolak,
+            'peserta' => $peserta,
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function terima(Request $request, $id_user)
     {
-        //
+        $peserta = User::findOrFail($id_user);
+
+        $peserta->validasi = 'diterima';
+        $peserta->save();
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Peserta berhasil diterima.',
+            'type' => 'success'
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function tolak(Request $request, $id_user)
     {
-        //
+        $peserta = User::findOrFail($id_user);
+
+        $peserta->validasi = 'ditolak';
+        $peserta->save();
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Peserta berhasil ditolak.',
+            'type' => 'success'
+        ]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function destroy($id_user)
     {
-        //
+        $peserta = User::findOrFail($id_user);
+
+        $peserta->delete();
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Peserta berhasil dihapus.',
+            'type' => 'success'
+        ]);
     }
 
     /**
@@ -53,14 +93,6 @@ class PesertaController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
     {
         //
     }

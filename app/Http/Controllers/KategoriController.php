@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,7 @@ class KategoriController extends Controller
             },
             'materi'
         ])->get();
-    
+
         return view('dashboard.kategori', [
             'kategori' => $kategori,
             'jumlah_kategori' => Kategori::count(),
@@ -29,9 +30,23 @@ class KategoriController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function pilih(Request $request, $id_user)
     {
-        //
+        $request->validate([
+            'kategori' => 'required|exists:kategori,id_kategori',
+        ], [
+            'kategori.required' => 'Kategori harus dipilih.',
+            'kategori.exists' => 'Kategori yang dipilih tidak valid.',
+        ]);
+
+        $user = User::findOrFail($id_user);
+        $user->id_kategori = $request->kategori;
+        $user->save();
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Kategori berhasil dipilih.',
+            'type' => 'success'
+        ]);
     }
 
     /**
@@ -39,7 +54,24 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'kode_kategori' => 'required|string|max:255|unique:kategori,kode_kategori',
+            'nama_kategori' => 'required|string|max:255',
+        ], [
+            'kode_kategori.required' => 'Kode kategori harus diisi.',
+            'kode_kategori.unique' => 'Kode kategori sudah ada.',
+            'nama_kategori.required' => 'Nama kategori harus diisi.',
+        ]);
+
+        Kategori::create([
+            'kode_kategori' => $request->kode_kategori,
+            'nama_kategori' => $request->nama_kategori,
+        ]);
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Kategori berhasil ditambahkan.',
+            'type' => 'success',
+        ]);
     }
 
     /**
@@ -53,24 +85,67 @@ class KategoriController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Kategori $kategori)
+    public function ubah(Request $request, $id_kategori)
     {
-        //
+        $request->validate([
+            'kategori' => 'required|exists:kategori,id_kategori',
+        ], [
+            'kategori.required' => 'Kategori harus dipilih.',
+            'kategori.exists' => 'Kategori yang dipilih tidak valid.',
+        ]);
+
+        $user = User::where('id_kategori', $id_kategori)->firstOrFail();
+
+        $user->id_kategori = $request->kategori;
+        $user->validasi = 'menunggu validasi';
+        $user->save();
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Kategori berhasil diubah dan sedang menunggu persetujuan.',
+            'type' => 'success',
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Kategori $kategori)
+    public function update(Request $request, $id_kategori)
     {
-        //
+        // Validasi input
+        $request->validate([
+            'kode_kategori' => 'required|string|max:255|unique:kategori,kode_kategori,' . $id_kategori . ',id_kategori',
+            'nama_kategori' => 'required|string|max:255',
+        ], [
+            'kode_kategori.required' => 'Kode kategori harus diisi.',
+            'kode_kategori.unique' => 'Kode kategori sudah ada.',
+            'nama_kategori.required' => 'Nama kategori harus diisi.',
+        ]);
+
+        $kategori = Kategori::findOrFail($id_kategori);
+
+        $kategori->update([
+            'kode_kategori' => $request->kode_kategori,
+            'nama_kategori' => $request->nama_kategori,
+        ]);
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Kategori berhasil diperbarui.',
+            'type' => 'success',
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Kategori $kategori)
+    public function destroy($id_kategori)
     {
-        //
+        $kategori = Kategori::findOrFail($id_kategori);
+        $kategori->delete();
+
+        return redirect()->back()->with('toast', [
+            'message' => 'Kategori berhasil dihapus.',
+            'type' => 'success',
+        ]);
     }
 }
