@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class KategoriController extends Controller
 {
@@ -85,7 +86,7 @@ class KategoriController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function ubah(Request $request, $id_kategori)
+    public function ubah(Request $request, $id_user)
     {
         $request->validate([
             'kategori' => 'required|exists:kategori,id_kategori',
@@ -94,13 +95,20 @@ class KategoriController extends Controller
             'kategori.exists' => 'Kategori yang dipilih tidak valid.',
         ]);
 
-        $user = User::where('id_kategori', $id_kategori)->firstOrFail();
+        $user = User::find($id_user);
+
+        if (!$user) {
+            return redirect()->route('kategori')->with('toast', [
+                'message' => 'User tidak ditemukan.',
+                'type' => 'error',
+            ]);
+        }
 
         $user->id_kategori = $request->kategori;
         $user->validasi = 'menunggu validasi';
         $user->save();
 
-        return redirect()->back()->with('toast', [
+        return redirect()->route('kategori')->with('toast', [
             'message' => 'Kategori berhasil diubah dan sedang menunggu persetujuan.',
             'type' => 'success',
         ]);

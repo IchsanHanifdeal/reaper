@@ -55,9 +55,8 @@
                     Pendaftaran Peserta
                 </h1>
                 <form class="space-y-4 md:space-y-6"
-                    action="{{ route('pilih.kategori', ['id_user' => Auth::user()->id]) }}" method="POST">
+                    action="{{ route('store.peserta') }}" method="POST">
                     @csrf
-                    @method('PUT')
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach ($fields as $field => $attributes)
                             <div>

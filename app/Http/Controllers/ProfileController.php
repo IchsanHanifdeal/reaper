@@ -55,7 +55,7 @@ class ProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id_user)
+    public function update(Request $request)
     {
         $user = Auth::user();
 
@@ -72,30 +72,29 @@ class ProfileController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Update the user profile
-        $user->update([
-            'nama' => $request->input('nama'),
-            'tempat' => $request->input('tempat'),
-            'tanggal_lahir' => $request->input('tanggal_lahir'),
-            'alamat' => $request->input('alamat'),
-            'no_hp' => $request->input('no_hp'),
-        ]);
+        $user->nama = $request->input('nama');
+        $user->tempat = $request->input('tempat');
+        $user->tanggal_lahir = $request->input('tanggal_lahir');
+        $user->alamat = $request->input('alamat');
+        $user->no_hp = $request->input('no_hp');
+
+        $user->save();
 
         return redirect()->back()->with('success', 'Profile updated successfully.');
     }
 
+
+
     /**
      * Remove the specified resource from storage.
      */
-    public function change_password(Request $request, $id_user)
+    public function change_password(Request $request)
     {
         $user = Auth::user();
 
-        // Validate the input
         $validator = Validator::make($request->all(), [
             'password_lama' => 'required|string|min:8',
             'password_baru' => 'required|string|min:8|confirmed',
-            'konfirmasi_password_baru' => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
@@ -106,10 +105,8 @@ class ProfileController extends Controller
             return redirect()->back()->withErrors(['password_lama' => 'The current password is incorrect.'])->withInput();
         }
 
-        // Update the password
-        $user->update([
-            'password' => Hash::make($request->input('password_baru')),
-        ]);
+        $user->password = Hash::make($request->input('password_baru'));
+        $user->save();
 
         return redirect()->back()->with('success', 'Password updated successfully.');
     }

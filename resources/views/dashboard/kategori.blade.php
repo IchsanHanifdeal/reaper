@@ -181,13 +181,11 @@
                                                             <button type="button"
                                                                 onclick="document.getElementById('pilih_kategori_{{ $item->id_kategori }}').close()"
                                                                 class="btn">Batal</button>
-                                                            <form
-                                                                action="{{ route('ubah_kategori', $item->id_kategori) }}"
+                                                            <form action="{{ route('ubah_kategori', ['id_user' => Auth::user()->id_user ]) }}"
                                                                 method="POST" class="inline-block">
                                                                 @csrf
                                                                 @method('PUT')
-                                                                <input type="hidden" name="kategori"
-                                                                    value="{{ $item->id_kategori }}">
+                                                                <input type="hidden" name="kategori" value="{{ $item->id_kategori }}">
                                                                 <button type="submit"
                                                                     class="btn btn-danger">Tukar</button>
                                                             </form>

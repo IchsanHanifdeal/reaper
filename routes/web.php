@@ -71,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/kategori', [KategoriController::class, 'index'])->name('kategori');
     Route::post('/dashboard/kategori/tambah', [KategoriController::class, 'store'])->name('tambah_kategori');
     Route::put('/dashboard/kategori/{id_kategori}/update', [KategoriController::class, 'update'])->name('edit_kategori');
-    Route::put('/dashboard/kategori/{id_kategori}/ubah', [KategoriController::class, 'ubah'])->name('ubah_kategori');
+    Route::put('/dashboard/kategori/{id_user}/ubah', [KategoriController::class, 'ubah'])->name('ubah_kategori');
     Route::delete('/dashboard/kategori/{id_kategori}/hapus', [KategoriController::class, 'destroy'])->name('hapus_kategori');
 
     Route::get('/dashboard/materi', [MateriController::class, 'index'])->name('materi');
